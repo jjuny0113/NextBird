@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Button, Card, Popover, Avatar, List ,Comment} from "antd";
+import { Button, Card, Popover, Avatar, List, Comment } from "antd";
 import Proptypes from "prop-types";
 import {
   RetweetOutlined,
@@ -11,6 +11,7 @@ import {
 import { useSelector } from "react-redux";
 import PostImages from "./PostImages";
 import CommentForm from "./CommentForm";
+import PostCardContent from "./PostCardContent";
 import styled from "styled-components";
 
 const PostCard = ({ post }) => {
@@ -65,7 +66,7 @@ const PostCard = ({ post }) => {
         <Card.Meta
           avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
           title={post.User.nickname}
-          description={post.content}
+          description={<PostCardContent postData={post.content} />}
         />
       </Card>
       {commentFormOpened && (
