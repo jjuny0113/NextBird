@@ -56,7 +56,12 @@ const PostImages = ({ images }) => {
       <div>
         <img
           role="presentation"
-          width="50%"
+          style={{
+            display: "inline-block",
+            width: "50%",
+            textAlign: "center",
+            verticalAlign: "middle",
+          }}
           src={images[0].src}
           alt={images[0].src}
           onClick={onZoom}

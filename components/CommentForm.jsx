@@ -12,7 +12,7 @@ const CommentForm = ({ post }) => {
 
   const dispatch = useDispatch();
   const id = useSelector((state) => state.user.me?.id);
-  const { addCommentDone } = useSelector((state) => state.user);
+  const { addCommentDone,addCommentLoading } = useSelector((state) => state.user);
 
   useEffect(() => {
     if (addCommentDone) {
@@ -36,7 +36,7 @@ const CommentForm = ({ post }) => {
           onChange={onChangeCommentText}
           rows={4}
         />
-        <ButtonPostition type="primary" htmlType="submit">
+        <ButtonPostition type="primary" htmlType="submit" loading={addCommentLoading}>
           삐약
         </ButtonPostition>
       </FormItem>
@@ -59,4 +59,5 @@ const ButtonPostition = styled(Button)`
   position: "absolute";
   right: 0;
   bottom: -40;
+  z-index:1;
 `;
