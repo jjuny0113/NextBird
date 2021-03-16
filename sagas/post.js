@@ -67,7 +67,7 @@ function* addPost(action) {
     yield put({
       type: ADD_POST_TO_ME,
       data: id,
-    });
+    });,
   } catch (e) {
     yield put({
       type: ADD_POST_FAILURE,
