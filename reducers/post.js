@@ -40,9 +40,17 @@ export const initialState = {
   retweetError: null,
 };
 
-export const LOAD_POSTS_REQUEST = "LOAD_POST_REQUEST";
-export const LOAD_POSTS_SUCCESS = "LOAD_POST_SCCUESS";
-export const LOAD_POSTS_FAILURE = "LOAD_POST_FAILURE";
+export const LOAD_POSTS_REQUEST = "LOAD_POSTS_REQUEST";
+export const LOAD_POSTS_SUCCESS = "LOAD_POSTS_SCCUESS";
+export const LOAD_POSTS_FAILURE = "LOAD_POSTS_FAILURE";
+
+export const LOAD_USER_POST_REQUEST = "LOAD_USER_POST_REQUEST";
+export const LOAD_USER_POST_SUCCESS = "LOAD_USER_POST_SCCUESS";
+export const LOAD_USER_POST_FAILURE = "LOAD_USER_POST_FAILURE";
+
+export const LOAD_HASHTAG_POST_REQUEST = "LOAD_HASHTAG_POST_REQUEST";
+export const LOAD_HASHTAG_POST_SUCCESS = "LOAD_HASHTAG_POST_SCCUESS";
+export const LOAD_HASHTAG_POST_FAILURE = "LOAD_HASHTAG_POST_FAILURE";
 
 export const ADD_POST_REQUEST = "ADD_POST_REQUEST";
 export const ADD_POST_SUCCESS = "ADD_POST_SCCUESS";
@@ -80,17 +88,26 @@ const reducer = (state = initialState, action) => {
       case REMOVE_IMAGE:
         draft.imagePaths = draft.imagePaths.filter((v, i) => i !== action);
         break;
+
+      case LOAD_USER_POST_REQUEST:
+      case LOAD_HASHTAG_POST_REQUEST:
       case LOAD_POSTS_REQUEST:
         draft.loadPostsLoading = true;
         draft.loadPostsDone = false;
         draft.loadPostsError = null;
         break;
+
+      case LOAD_USER_POST_SUCCESS:
+      case LOAD_HASHTAG_POST_SUCCESS:
       case LOAD_POSTS_SUCCESS:
         draft.loadPostsLoading = false;
         draft.loadPostsDone = true;
         draft.mainPosts = draft.mainPosts.concat(action.data);
         draft.hasMorePosts = action.data.length === 10;
         break;
+
+      case LOAD_USER_POST_FAILURE:
+      case LOAD_HASHTAG_POST_FAILURE:
       case LOAD_POSTS_FAILURE:
         draft.loadPostsLoading = false;
         draft.loadPostsError = action.error;
