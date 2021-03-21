@@ -4,7 +4,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import useInput from "../hooks/useInput";
 import { useDispatch, useSelector } from "react-redux";
-import { loginRequestAction } from "../reducers/user";
+import { LOG_IN_REQUEST } from "../reducers/user";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -14,7 +14,10 @@ const LoginForm = () => {
 
   const onSubmitForm = useCallback(() => {
     console.log(email, password);
-    dispatch(loginRequestAction(email));
+    dispatch({
+      type: LOG_IN_REQUEST,
+      data: { email, password },
+    });
   }, [email, password]);
 
   return (

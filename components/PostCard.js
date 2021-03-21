@@ -1,6 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button, Card, Popover, Avatar, List, Comment } from "antd";
-import Proptypes from "prop-types";
 import {
   RetweetOutlined,
   HeartOutlined,
@@ -14,10 +13,14 @@ import CommentForm from "./CommentForm";
 import PostCardContent from "./PostCardContent";
 import FollowButton from "./FollowButton";
 import styled from "styled-components";
-import { REMOVE_POST_REQUEST } from "../reducers/post";
+import {
+  REMOVE_POST_REQUEST,
+  LIKE_POST_REQUEST,
+  UNLIKE_POST_REQUEST,
+  RETWEET_REQUEST,
+} from "../reducers/post";
 
 const PostCard = ({ post }) => {
-  const [liked, setLiked] = useState(false);
   const [commentFormOpened, setCommentFormOpened] = useState(false);
 
   const { me } = useSelector((state) => state.user);
@@ -26,36 +29,68 @@ const PostCard = ({ post }) => {
 
   const dispatch = useDispatch();
 
-  const onToggleLike = useCallback(() => {
-    setLiked((prev) => !prev);
+  const onRetweet = useCallback(() => {
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    dispatch({
+      type: RETWEET_REQUEST,
+    });
+  }, [id]);
+
+  const onLike = useCallback(() => {
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    return dispatch({
+      type: LIKE_POST_REQUEST,
+      data: post.id,
+    });
+  }, []);
+
+  const onUnlike = useCallback(() => {
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    return dispatch({
+      type: UNLIKE_POST_REQUEST,
+      data: post.id,
+    });
   }, []);
 
   const onToggleComment = useCallback(() => {
-    setCommentFormOpened((prev) => !prev);
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    return setCommentFormOpened((prev) => !prev);
   }, []);
 
   const onRemovePost = useCallback(() => {
-    dispatch({
+    if (!id) {
+      return alert("로그인이 필요합니다.");
+    }
+    return dispatch({
       type: REMOVE_POST_REQUEST,
       data: post.id,
     });
   }, []);
 
+  const liked = post.Likers.find((v) => v.id === id);
 
   return (
     <PostCardWrapper>
       <Card
         cover={post.Images[0] && <PostImages images={post.Images} />}
         actions={[
-          <RetweetOutlined key="retweet" />,
+          <RetweetOutlined key="retweet" onClick={onRetweet} />,
           liked ? (
             <HeartTwoTone
               twoToneColor="#eb2f96"
               key="twoTone"
-              onClick={onToggleLike}
+              onClick={onUnlike}
             />
           ) : (
-            <HeartOutlined key="heart" onClick={onToggleLike} />
+            <HeartOutlined key="heart" onClick={onLike} />
           ),
           <MessageOutlined key="message" onClick={onToggleComment} />,
           <Popover
@@ -82,13 +117,32 @@ const PostCard = ({ post }) => {
             <EllipsisOutlined />
           </Popover>,
         ]}
+        title={
+          post.RetweetId ? `${post.User.nickname}님이 리트윗하셨습니다.` : null
+        }
         extra={id && <FollowButton post={post} />}
       >
-        <Card.Meta
-          avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
-          title={post.User.nickname}
-          description={<PostCardContent postData={post.content} />}
-        />
+        {post.RetweetId && post.Retweet ? (
+          <Card
+            cover={
+              post.Retweet.Images[0] && (
+                <PostImages images={post.Retweet.Images} />
+              )
+            }
+          >
+            <Card.Meta
+              avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+              title={post.User.nickname}
+              description={<PostCardContent postData={post.content} />}
+            />
+          </Card>
+        ) : (
+          <Card.Meta
+            avatar={<Avatar>{post.User.nickname[0]}</Avatar>}
+            title={post.User.nickname}
+            description={<PostCardContent postData={post.content} />}
+          />
+        )}
       </Card>
       {commentFormOpened && (
         <div>
@@ -111,17 +165,6 @@ const PostCard = ({ post }) => {
       )}
     </PostCardWrapper>
   );
-};
-
-PostCard.prototype = {
-  post: Proptypes.shape({
-    id: Proptypes.number,
-    User: Proptypes.object,
-    content: Proptypes.string,
-    createdAt: Proptypes.object,
-    Comments: Proptypes.arrayOf(Proptypes.object),
-    Images: Proptypes.arrayOf(Proptypes.object),
-  }).isRequired,
 };
 
 export default PostCard;

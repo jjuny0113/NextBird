@@ -1,45 +1,8 @@
 import shortId from "shortid";
 import produce from "immer";
-import faker from "faker";
 
 export const initialState = {
-  mainPosts: [
-    {
-      id: 1,
-      User: {
-        id: 1,
-        nickname: "제로초",
-      },
-      content: "첫 번째 게시글 #해시태그 #익스프레스",
-      Images: [
-        {
-          id: shortId.generate(),
-          src:
-            "https://cdn.pixabay.com/photo/2014/05/03/00/56/summerfield-336672_1280.jpg",
-        },
-        {
-          id: shortId.generate(),
-          src:
-            "https://cdn.pixabay.com/photo/2016/10/27/13/22/girl-1775035__480.jpg",
-        },
-        {
-          id: shortId.generate(),
-          src:
-            "https://cdn.pixabay.com/photo/2015/01/07/15/51/woman-591576_1280.jpg",
-        },
-      ],
-      Comments: [
-        {
-          id: shortId.generate(),
-          User: {
-            id: shortId.generate(),
-            nickname: "nero",
-          },
-          content: "와 이쁘닷",
-        },
-      ],
-    },
-  ],
+  mainPosts: [],
   imagePaths: [],
 
   hasMorePosts: true,
@@ -59,33 +22,23 @@ export const initialState = {
   removePostLoading: false,
   removePostDone: false,
   removePostError: null,
-};
 
-export const generateDummyPost = (number) =>
-  Array(number)
-    .fill()
-    .map(() => ({
-      id: shortId.generate(),
-      User: {
-        id: shortId.generate(),
-        nickname: faker.name.findName(),
-      },
-      content: faker.lorem.paragraph(),
-      Images: [
-        {
-          src: faker.image.image(),
-        },
-      ],
-      Comments: [
-        {
-          User: {
-            id: shortId.generate(),
-            nickname: faker.name.findName(),
-          },
-          content: faker.lorem.sentence(),
-        },
-      ],
-    }));
+  likePostLoading: false,
+  likePostDone: false,
+  likePostError: null,
+
+  unlikePostLoading: false,
+  unlikePostDone: false,
+  unlikePostError: null,
+
+  uploadImagesLoading: false,
+  uploadImagesDone: false,
+  uploadImagesError: null,
+
+  retweetLoading: false,
+  retweetDone: false,
+  retweetError: null,
+};
 
 export const LOAD_POSTS_REQUEST = "LOAD_POST_REQUEST";
 export const LOAD_POSTS_SUCCESS = "LOAD_POST_SCCUESS";
@@ -103,46 +56,30 @@ export const REMOVE_POST_REQUEST = "REMOVE_POST_REQUEST";
 export const REMOVE_POST_SUCCESS = "REMOVE_POST_SCCUESS";
 export const REMOVE_POST_FAILURE = "REMOVE_POST_FAILURE";
 
-export const addPost = (data) => {
-  return {
-    type: ADD_POST_REQUEST,
-    data,
-  };
-};
+export const LIKE_POST_REQUEST = "LIKE_POST_REQUEST";
+export const LIKE_POST_SUCCESS = "LIKE_POST_SCCUESS";
+export const LIKE_POST_FAILURE = "LIKE_POST_FAILURE";
 
-export const addComment = (data) => ({
-  type: ADD_COMMENT_REQUEST,
-  data,
-});
+export const UNLIKE_POST_REQUEST = "UNLIKE_POST_REQUEST";
+export const UNLIKE_POST_SUCCESS = "UNLIKE_POST_SCCUESS";
+export const UNLIKE_POST_FAILURE = "UNLIKE_POST_FAILURE";
 
-export const removeComment = (data) => ({
-  type: REMOVE_POST_REQUEST,
-  data,
-});
+export const UPLOAD_IMAGES_REQUEST = "UPLOAD_IMAGES_REQUEST";
+export const UPLOAD_IMAGES_SUCCESS = "UPLOAD_IMAGES_SCCUESS";
+export const UPLOAD_IMAGES_FAILURE = "UPLOAD_IMAGES_FAILURE";
 
-const dummyPost = (data) => ({
-  id: data.id,
-  content: data.content,
-  User: {
-    id: 1,
-    nickname: "junny",
-  },
-  Images: [],
-  Comments: [],
-});
+export const RETWEET_REQUEST = "RETWEET_REQUEST";
+export const RETWEET_SUCCESS = "RETWEET_SCCUESS";
+export const RETWEET_FAILURE = "RETWEET_FAILURE";
 
-const dummyComment = (data) => ({
-  id: shortId.generate(),
-  content: data,
-  User: {
-    id: 1,
-    nickname: "junny",
-  },
-});
+export const REMOVE_IMAGE = "REMOVE_IMAGE";
 
 const reducer = (state = initialState, action) => {
   return produce(state, (draft) => {
     switch (action.type) {
+      case REMOVE_IMAGE:
+        draft.imagePaths = draft.imagePaths.filter((v, i) => i !== action);
+        break;
       case LOAD_POSTS_REQUEST:
         draft.loadPostsLoading = true;
         draft.loadPostsDone = false;
@@ -151,8 +88,8 @@ const reducer = (state = initialState, action) => {
       case LOAD_POSTS_SUCCESS:
         draft.loadPostsLoading = false;
         draft.loadPostsDone = true;
-        draft.mainPosts = action.data.concat(draft.mainPosts);
-        draft.hasMorePosts = draft.mainPosts.length < 50;
+        draft.mainPosts = draft.mainPosts.concat(action.data);
+        draft.hasMorePosts = action.data.length === 10;
         break;
       case LOAD_POSTS_FAILURE:
         draft.loadPostsLoading = false;
@@ -167,7 +104,8 @@ const reducer = (state = initialState, action) => {
       case ADD_POST_SUCCESS:
         draft.addPostLoading = false;
         draft.addPostDone = true;
-        draft.mainPosts.unshift(dummyPost(action.data));
+        draft.mainPosts.unshift(action.data);
+        draft.imagePaths = [];
         break;
       case ADD_POST_FAILURE:
         draft.addPostLoading = false;
@@ -194,8 +132,8 @@ const reducer = (state = initialState, action) => {
         //   addCommentDone: true,
         //   Comments: action.data,
         // };
-        const post = draft.mainPosts.find((v) => v.id === action.data.postId);
-        post.Comments.unshift(dummyComment(action.data.content));
+        const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+        post.Comments.unshift(action.data);
         draft.addCommentLoading = false;
         draft.addCommentDone = true;
         break;
@@ -211,13 +149,80 @@ const reducer = (state = initialState, action) => {
         draft.removePostError = null;
         break;
       case REMOVE_POST_SUCCESS:
-        draft.mainPosts = draft.mainPosts.filter((v) => v.id !== action.data);
+        draft.mainPosts = draft.mainPosts.filter(
+          (v) => v.id !== action.data.PostId
+        );
         draft.removePostLoading = false;
         draft.removePostDone = true;
         break;
       case REMOVE_POST_FAILURE:
         draft.removePostLoading = false;
         draft.removePostError = action.error;
+        break;
+
+      case LIKE_POST_REQUEST:
+        draft.likePostLoading = true;
+        draft.likePostDone = false;
+        draft.likePostError = null;
+        break;
+      case LIKE_POST_SUCCESS: {
+        const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+        post.Likers.push({ id: action.data.UserId });
+        draft.likePostLoading = false;
+        draft.likePostDone = true;
+        break;
+      }
+      case LIKE_POST_FAILURE:
+        draft.likePostLoading = false;
+        draft.likePostError = action.error;
+        break;
+
+      case UNLIKE_POST_REQUEST:
+        draft.unlikePostLoading = true;
+        draft.unlikePostDone = false;
+        draft.unlikePostError = null;
+        break;
+      case UNLIKE_POST_SUCCESS: {
+        const post = draft.mainPosts.find((v) => v.id === action.data.PostId);
+        post.Likers = post.Likers.filter((v) => v.id !== action.data.UserId);
+        draft.unlikePostLoading = false;
+        draft.unlikePostDone = true;
+        break;
+      }
+      case UNLIKE_POST_FAILURE:
+        draft.unlikePostLoading = false;
+        draft.unlikePostError = action.error;
+        break;
+
+      case UPLOAD_IMAGES_REQUEST:
+        draft.uploadImagesLoading = true;
+        draft.uploadImagesDone = false;
+        draft.uploadImagesError = null;
+        break;
+      case UPLOAD_IMAGES_SUCCESS: {
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesDone = true;
+        break;
+      }
+      case UPLOAD_IMAGES_FAILURE:
+        draft.uploadImagesLoading = false;
+        draft.uploadImagesError = action.error;
+        break;
+
+      case RETWEET_REQUEST:
+        draft.retweetLoading = true;
+        draft.retweetDone = false;
+        draft.retweetError = null;
+        break;
+      case RETWEET_SUCCESS: {
+        draft.retweetLoading = false;
+        draft.retweetDone = true;
+        draft.mainPosts.unshift(action.data);
+        break;
+      }
+      case RETWEET_FAILURE:
+        draft.retweetLoading = false;
+        draft.retweetError = action.error;
         break;
       default:
         break;
