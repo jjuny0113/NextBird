@@ -29,6 +29,10 @@ export const initialState = {
   loadMyInfoDone: false,
   loadMyInfoError: null,
 
+  loadUserLoading: false,
+  loadUserDone: false,
+  loadUserError: null,
+
   changeNicknameLoading: false,
   changeNicknameDone: false,
   changeNicknameError: null,
@@ -42,8 +46,7 @@ export const initialState = {
   loadFollowingsError: null,
 
   me: null,
-  signUpData: {},
-  loginData: {},
+  userInfo: null,
 };
 
 export const LOG_IN_REQUEST = "LOG_IN_REQUEST";
@@ -61,6 +64,10 @@ export const SIGN_UP_FAILURE = "SIGN_UP_FAILURE";
 export const LOAD_MY_INFO_REQUEST = "LOAD_MY_INFO_REQUEST_REQUEST";
 export const LOAD_MY_INFO_SUCCESS = "LOAD_MY_INFO_REQUEST_SUCCESS";
 export const LOAD_MY_INFO_FAILURE = "LOAD_MY_INFO_REQUEST_FAILURE";
+
+export const LOAD_USER_REQUEST = "LOAD_USER_REQUEST_REQUEST";
+export const LOAD_USER_SUCCESS = "LOAD_USER_REQUEST_SUCCESS";
+export const LOAD_USER_FAILURE = "LOAD_USER_REQUEST_FAILURE";
 
 export const CHANGE_NICKNAME_REQUEST = "CHANGE_NICKNAME_REQUEST";
 export const CHANGE_NICKNAME_SUCCESS = "CHANGE_NICKNAME_SUCCESS";
@@ -249,6 +256,21 @@ const reducer = (state = initialState, action) => {
       case LOAD_FOLLOWINGS_FAILURE:
         draft.loadFollowingsLoading = false;
         draft.loadFollowingsError = action.error;
+        break;
+
+      case LOAD_USER_REQUEST:
+        draft.loadUserLoading = true;
+        draft.loadUserDone = false;
+        draft.loadUserError = null;
+        break;
+      case LOAD_USER_SUCCESS:
+        draft.loadUserLoading = false;
+        draft.loadUserDone = true;
+        draft.userInfo = action.data;
+        break;
+      case LOAD_USER_FAILURE:
+        draft.loadUserLoading = false;
+        draft.loadUserError = action.error;
         break;
 
       default:
